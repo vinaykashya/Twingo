@@ -46,7 +46,7 @@ class WaypointUpdater(object):
 
     def waypoints_cb(self, waypoints):
         # TODO: Implement
-        # self.final_waypoints_pub.publish(waypoints[-LOOKAHEAD_WPS:])
+        self.final_waypoints_pub.publish(waypoints[-LOOKAHEAD_WPS:])
         pass
 
     def traffic_cb(self, msg):
