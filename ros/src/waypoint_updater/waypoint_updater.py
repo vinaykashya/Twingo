@@ -46,6 +46,7 @@ class WaypointUpdater(object):
 
     def waypoints_cb(self, waypoints):
         # TODO: Implement
+        rospy.logwarn('waypoints: ', waypoints)
         self.final_waypoints_pub.publish(waypoints[-LOOKAHEAD_WPS:])
         pass
 
