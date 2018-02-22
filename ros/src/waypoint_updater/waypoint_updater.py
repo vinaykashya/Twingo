@@ -46,6 +46,7 @@ class WaypointUpdater(object):
 
     def waypoints_cb(self, waypoints):
         # TODO: Implement
+        self.final_waypoints_pub.publish(waypoints)
         pass
 
     def traffic_cb(self, msg):
