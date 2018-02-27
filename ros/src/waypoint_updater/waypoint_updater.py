@@ -36,17 +36,34 @@ class WaypointUpdater(object):
 
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
+        self.base_waypoints = None
+        self.base_waypoints_len = 0
         # TODO: Add other member variables you need below
 
         rospy.spin()
 
     def pose_cb(self, msg):
         # TODO: Implement
-        rospy.logwarn('pose: x: %s, y: %s, z: %s', msg.pose.position.x, msg.pose.position.y, msg.pose.position.z)
+        min_dist, min_index = self.search_base_waypoints(msg)
+        rospy.logwarn('min_dist: %s, min_index: %s', min_dist, min_index)
+        # rospy.logwarn('pose: x: %s, y: %s, z: %s', msg.pose.position.x, msg.pose.position.y, msg.pose.position.z)
         pass
+
+    def search_base_waypoints(self, msg):
+        min_dist = 10000
+        min_index = 0
+        dl = lambda a, b: math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2  + (a.z-b.z)**2)
+        for i in range(self.base_waypoints_len):
+            dist = dl(self.base_waypoints[i].pose.pose.position, msg.pose.position)
+            if dist < min_dist:
+                min_dist = dist
+                min_index = i
+        return min_dist, min_index
 
     def waypoints_cb(self, waypoints):
         # TODO: Implement
+        self.base_waypoints = waypoints.waypoints
+        self.base_waypoints_len = len(waypoints.waypoints)
         rospy.logwarn('waypoints: x: %s y: %s z: %s', waypoints.waypoints[0].twist.twist.linear.x, waypoints.waypoints[0].twist.twist.linear.y, waypoints.waypoints[0].twist.twist.linear.z)
         # rospy.logwarn('waypoints: ', str(waypoints))
 
