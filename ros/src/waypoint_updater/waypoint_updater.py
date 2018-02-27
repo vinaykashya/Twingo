@@ -42,11 +42,12 @@ class WaypointUpdater(object):
 
     def pose_cb(self, msg):
         # TODO: Implement
+        rospy.logwarn('pose: x: %s, y: %s, z: %s', msg.pose.position.x, msg.pose.position.y, msg.pose.position.z)
         pass
 
     def waypoints_cb(self, waypoints):
         # TODO: Implement
-        rospy.logwarn('waypoints: x: %s', waypoints.waypoints[0].twist.twist.linear.x)
+        rospy.logwarn('waypoints: x: %s y: %s z: %s', waypoints.waypoints[0].twist.twist.linear.x, waypoints.waypoints[0].twist.twist.linear.y, waypoints.waypoints[0].twist.twist.linear.z)
         # rospy.logwarn('waypoints: ', str(waypoints))
 
         # self.final_waypoints_pub.publish(waypoints[-LOOKAHEAD_WPS:])
