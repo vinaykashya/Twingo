@@ -44,9 +44,11 @@ class WaypointUpdater(object):
 
     def pose_cb(self, msg):
         # TODO: Implement
+        lane = Lane()
         min_dist, min_index = self.search_base_waypoints(msg)
-        rospy.logwarn('min_dist: %s, min_index: %s', min_dist, min_index)
-        self.final_waypoints_pub.publish(self.base_waypoints[min_index:min_index+LOOKAHEAD_WPS])
+        # rospy.logwarn('min_dist: %s, min_index: %s', min_dist, min_index)
+        lane.waypoints = self.base_waypoints[min_index:min_index+LOOKAHEAD_WPS]
+        self.final_waypoints_pub.publish(lane)
         # rospy.logwarn('pose: x: %s, y: %s, z: %s', msg.pose.position.x, msg.pose.position.y, msg.pose.position.z)
         pass
 

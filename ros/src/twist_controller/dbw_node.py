@@ -53,24 +53,31 @@ class DBWNode(object):
         self.brake_pub = rospy.Publisher('/vehicle/brake_cmd',
                                          BrakeCmd, queue_size=1)
 
+        self.dbw_enabled = False
+        self.velocity = None
+        self.twist = None
         # TODO: Create `Controller` object
         # self.controller = Controller(<Arguments you wish to provide>)
 
         # TODO: Subscribe to all the topics you need to
-        self.current_speed_sub = rospy.Subscriber('/current_velocity', TwistStamped, self.current_speed_cb)
-        self.twist_cmd_sub = rospy.Subscriber('/twist_cmd', self.twist_cmd_cb)
-        self.dbw_enabled_sub = rospy.Subscriber('/vehicle/dbw_enabled', self.dbw_enabled_cb)
+        self.current_velocity_sub = rospy.Subscriber('/current_velocity', TwistStamped, self.current_speed_cb)
+        self.twist_cmd_sub = rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_cmd_cb)
+        self.dbw_enabled_sub = rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
         self.loop()
 
-    def current_speed_cb:
+    def current_speed_cb(self, current_velocity):
+        self.velocity = current_velocity.twist
         pass
 
-    def twist_cmd_cb:
+    def twist_cmd_cb(self, twist_cmd):
+        self.twist = twist_cmd.twist
         pass
 
-    def dbw_enabled_cb:
+    def dbw_enabled_cb(self, msg):
+        rospy.logwarn('dbw_enabled %s', msg.data)
+        self.dbw_enabled = bool(msg.data)
         pass
-    
+
     def loop(self):
         rate = rospy.Rate(50) # 50Hz
         while not rospy.is_shutdown():
