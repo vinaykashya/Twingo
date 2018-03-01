@@ -17,6 +17,7 @@ class Controller(object):
         max_steer_angle = kwargs['max_steer_angle']
 
         self.linear_pid = PID(kp=0.1, ki=0.0, kd=0.03, mn=kwargs['decel_limit'], mx=kwargs['accel_limit'])
+        self.steer_pid = PID(kp=2., ki=0.1, kd=0.3, mn=-kwargs['max_steer_angle'], mx=kwargs['max_steer_angle'])
         self.yaw_controller = YawController(wheel_base, steer_ratio, min_speed, max_lat_accel, max_steer_angle)
         self.last_time = rospy.get_time()
         pass
@@ -30,8 +31,10 @@ class Controller(object):
     def control(self, linear_velocity, angular_velocity, current_velocity):
         # TODO: Change the arg, kwarg list to suit your needs
         # Return throttle, brake, steer
+        rospy.logwarn('linear_velocity %s', linear_velocity)
         interval = self.get_interval()
         linear_err = linear_velocity - current_velocity
        	throttle = self.linear_pid.step(linear_err, interval)
         steer = self.yaw_controller.get_steering(linear_velocity, angular_velocity, current_velocity)
+        steer = self.steer_pid.step(steer, interval)
         return throttle, 0., steer
