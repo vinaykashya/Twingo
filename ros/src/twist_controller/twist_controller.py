@@ -47,7 +47,7 @@ class Controller(object):
     def control(self, linear_velocity, angular_velocity, current_velocity, dbw_enabled):
         # TODO: Change the arg, kwarg list to suit your needs
         # Return throttle, brake, steer
-        rospy.logwarn('linear_velocity %s', linear_velocity)
+        #rospy.logwarn('linear_velocity %s', linear_velocity)
         interval = self.get_interval()
 	if dbw_enabled:
 	   linear_err = linear_velocity - current_velocity

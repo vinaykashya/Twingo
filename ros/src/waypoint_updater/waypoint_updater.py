@@ -22,6 +22,7 @@ class WaypointUpdater(object):
         rospy.Subscriber('/current_pose',      PoseStamped, self.current_pose_cb)
         rospy.Subscriber('/base_waypoints',    Lane,        self.base_waypoints_cb)
         rospy.Subscriber('/current_velocity',  TwistStamped,self.current_velocity_cb)
+	rospy.Subscriber('/traffic_waypoint',  Int32,self.traffic_cb)
 	#TODO - Subscribe to traffic light and obstacle detectors
 
         self.current_velocity = 0.0
@@ -47,14 +48,23 @@ class WaypointUpdater(object):
             waypoints = self.base_waypoints.waypoints
 
             next_waypoint_idx    = self.waypoint_idx_ahead_of_car(current_pose, waypoints)
-	    #TODO - obtain traffic_light_waypoint
+	    closest_traffic_waypoint = self.traffic_waypoint
+	    rospy.logwarn('Next waypoint - %d',next_waypoint_idx)
+	    rospy.logwarn('Traffic waypoint - %d',closest_traffic_waypoint)
+	    #rospy.logwarn(next_waypoint_idx)
+	    #rospy.logwarn(closest_traffic_waypoint)
+	    #rospy.logwarn(self.current_velocity**2/(2 * MAX_DECEL))
 
+	    distance_to_TL = self.distance(current_pose.pose.position, waypoints[closest_traffic_waypoint].pose.pose.position)
 
-	    #TODO - 1. Check if initializing (No traffic lights or obstacles)
-	    #TODO - 2. Check if we are braking (To stop at TL)
-	    #TODO - 3. If braking for TL, final way points will be (next_waypoint+ dist to TL)
-	    #TODO - Default - final way points will be (next_waypoint+ LOOKAHEAD)
-            lane.waypoints = self.next_waypoints_set(waypoints, next_waypoint_idx, next_waypoint_idx+LOOKAHEAD_WPS)
+	    if closest_traffic_waypoint == -1:
+		self.braking = False
+            	lane.waypoints = self.next_waypoints_set(waypoints, next_waypoint_idx, next_waypoint_idx+LOOKAHEAD_WPS)
+	    elif not self.braking and distance_to_TL < (self.current_velocity**2/(2 * MAX_DECEL)):
+		lane.waypoints = self.next_waypoints_set(waypoints, next_waypoint_idx, next_waypoint_idx+LOOKAHEAD_WPS) 
+	    else:
+		self.braking = True
+		lane.waypoints = self.next_waypoints_set(waypoints, next_waypoint_idx, closest_traffic_waypoint)
             self.final_waypoints_pub.publish(lane)
 
     def waypoint_idx_ahead_of_car(self, pose, waypoints):
@@ -76,30 +86,47 @@ class WaypointUpdater(object):
 
     def next_waypoints_set(self, waypoints, start_wp, end_wp):
         final_waypoints = []
-        for i in range(start_wp, end_wp):
+        for i in range(start_wp, start_wp + LOOKAHEAD_WPS):
+	    wp = Waypoint()
             index = i % len(waypoints)
-            wp = Waypoint()
-            wp.pose.pose.position.x  = waypoints[index].pose.pose.position.x
-            wp.pose.pose.position.y  = waypoints[index].pose.pose.position.y
-            wp.pose.pose.position.z  = waypoints[index].pose.pose.position.z
-            wp.pose.pose.orientation = waypoints[index].pose.pose.orientation
-	    wp.twist.twist.linear.x = waypoints[index].twist.twist.linear.x
-	    #TODO - if braking, set twist to a small value 
-	    #TODO - if at TL, twist should be 0
-	    #default
-	    wp.twist.twist.linear.x = waypoints[index].twist.twist.linear.x
-            final_waypoints.append(wp)
-	    #TODO -Decelerate while braking if TL is detected
+	    #rospy.logwarn('aa %d',index)
+            if index < end_wp:
+            	wp.pose.pose.position.x  = waypoints[index].pose.pose.position.x
+            	wp.pose.pose.position.y  = waypoints[index].pose.pose.position.y
+            	wp.pose.pose.position.z  = waypoints[index].pose.pose.position.z
+            	wp.pose.pose.orientation = waypoints[index].pose.pose.orientation
+	    	wp.twist.twist.linear.x = waypoints[index].twist.twist.linear.x
+	    else:
+            	wp.pose.pose.position.x  = waypoints[index].pose.pose.position.x
+            	wp.pose.pose.position.y  = waypoints[index].pose.pose.position.y
+            	wp.pose.pose.position.z  = waypoints[index].pose.pose.position.z
+            	wp.pose.pose.orientation = waypoints[index].pose.pose.orientation
+	    	wp.twist.twist.linear.x = 0
+	    final_waypoints.append(wp)
+
+	    #Decelerate while braking if TL is detected
+	if self.braking:
+		#rospy.logwarn(end_wp-start_wp)
+		#rospy.logwarn(len(final_waypoints))
+		final_waypoints = self.decelerate(final_waypoints, end_wp-start_wp-1)
         return final_waypoints
 
 
     def distance(self, p1, p2):
-        x = p1.x - p2.x
-        y = p1.y - p2.y
-        z = p1.z - p2.z
+        x, y, z = p1.x - p2.x, p1.y - p2.y, p1.z - p2.z
         return math.sqrt(x*x + y*y + z*z)
 
-
+    def decelerate(self, waypoints, TL_waypoint_idx):
+        last = waypoints[TL_waypoint_idx]
+        last.twist.twist.linear.x = 0.
+        for wp in waypoints[:TL_waypoint_idx][::-1]:
+            dist = self.distance(wp.pose.pose.position, last.pose.pose.position)
+            vel = math.sqrt(2 * self.decel * dist)
+            if vel < 1.:
+                vel = 0.
+            wp.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
+        return waypoints
+    
     def current_pose_cb(self, msg):
         self.current_pose = msg
 
@@ -110,6 +137,9 @@ class WaypointUpdater(object):
 
     def current_velocity_cb(self, msg):
         self.current_velocity = msg.twist.linear.x
+
+    def traffic_cb(self,msg):
+	self.traffic_waypoint = msg.data
 
 
     #TODO - callback for obstacle and traffic light detector subscribers
