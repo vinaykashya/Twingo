@@ -101,7 +101,23 @@ class TLDetector(object):
 
         """
         #TODO implement
-        return 0
+        if self.waypoints is None:
+            return
+        closestLen = 10000
+        closestWaypoint = None
+
+        pos_x = pose.position.x
+        pos_y = pose.position.y
+
+        for i, waypoint in enumerate(self.waypoints):
+            wp_x = waypoint.pose.pose.position.x
+            wp_y = waypoint.pose.pose.position.y
+            dist = math.sqrt((pos_x - wp_x)*(pos_x - wp_x) + (pos_y - wp_y)*(pos_y - wp_y))
+            if (dist < closestLen):
+                closestLen = dist
+                closestWaypoint = i
+                
+        return closestWaypoint
 
     def get_light_state(self, light):
         """Determines the current color of the traffic light
@@ -139,10 +155,25 @@ class TLDetector(object):
             car_position = self.get_closest_waypoint(self.pose.pose)
 
         #TODO find the closest visible traffic light (if one exists)
+        for light_stop_position in stop_line_positions:
+            light_stop_pose = Pose()
+            light_stop_pose.position.x = light_stop_position[0]
+            light_stop_pose.position.y = light_stop_position[1]
+            closest_light_wp = self.get_closest_waypoint(light_stop_pose) #get waypoint closest to each light_position
+            if closest_light_wp >= car_position:
+                if closest_light_stop_wp is None:
+                    closest_light_stop_wp = closest_light_wp
+                    light = light_stop_pose
+                elif closest_light_wp < closest_light_stop_wp:
+                    closest_light_stop_wp = closest_light_wp
+                    light = light_stop_pose
+
+        if (closest_light_stop_wp is not None):
+            dist_to_light = abs(closest_light_stop_wp - car_position)
 
         if light:
             state = self.get_light_state(light)
-            return light_wp, state
+            return closest_light_stop_wp, state
         self.waypoints = None
         return -1, TrafficLight.UNKNOWN
 
