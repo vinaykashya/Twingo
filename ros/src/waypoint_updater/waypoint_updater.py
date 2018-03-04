@@ -49,8 +49,8 @@ class WaypointUpdater(object):
 
             next_waypoint_idx    = self.waypoint_idx_ahead_of_car(current_pose, waypoints)
 	    closest_traffic_waypoint_idx = self.next_traffic_light_waypoint_idx
-	    rospy.logwarn('Next waypoint - %d',next_waypoint_idx)
-	    rospy.logwarn('Traffic waypoint - %d',closest_traffic_waypoint_idx)
+	    #rospy.logwarn('Next waypoint - %d',next_waypoint_idx)
+	    #rospy.logwarn('Traffic waypoint - %d',closest_traffic_waypoint_idx)
 
 
 	    
@@ -118,8 +118,8 @@ class WaypointUpdater(object):
         return math.sqrt(x*x + y*y + z*z)
 
     def decelerate(self, waypoints, TL_waypoint_idx):
-	rospy.logwarn('Waypoints-%d',len(waypoints))
-	rospy.logwarn('TL_waypoint_idx-%d',(TL_waypoint_idx))
+	#rospy.logwarn('Waypoints-%d',len(waypoints))
+	#rospy.logwarn('TL_waypoint_idx-%d',(TL_waypoint_idx))
 	if TL_waypoint_idx > len(waypoints)-1:
 		return waypoints
         last = waypoints[TL_waypoint_idx]

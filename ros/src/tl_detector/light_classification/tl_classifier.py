@@ -38,10 +38,7 @@ class TLClassifier(object):
         self.detection_classes = self.graph_detection.get_tensor_by_name('detection_classes:0')
 	self.detection_scores = self.graph_detection.get_tensor_by_name('detection_scores:0')
 
-
-
-
-        ## kick classification to preload models
+        ## preload mdoel weights
         self.detection(cv2.cvtColor(np.zeros((600, 800), np.uint8), cv2.COLOR_GRAY2RGB))
         self.classification(cv2.cvtColor(np.zeros((32, 32), np.uint8), cv2.COLOR_GRAY2RGB))
 
