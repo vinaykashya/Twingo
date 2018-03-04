@@ -16,29 +16,27 @@ class TLClassifier(object):
         if not os.path.exists(classification_model_path):
             rospy.logerr('Classification model not found at {}'.format(classification_model_path))
 
-        # Check if GPU present
-        if os.getenv('HOSTNAME') == 'miha-mx':
-            self.config = tf.ConfigProto(device_count = {'GPU': 1, 'CPU': 1})
-            self.config.gpu_options.allow_growth = True
-            self.config.gpu_options.per_process_gpu_memory_fraction = 1
-        else:
-            self.config = tf.ConfigProto()
+        self.config = tf.ConfigProto()
+        self.config.gpu_options.allow_growth = True
+        self.config.gpu_options.per_process_gpu_memory_fraction = 1
         jit_level = tf.OptimizerOptions.ON_1
         self.config.graph_options.optimizer_options.global_jit_level = jit_level
 
 
         self.graph_detection = self.graph_load(detection_model_path, self.config)
-        self.graph_classification = self.graph_load(classification_model_path, self.config)
-        self.detection_session_tf = tf.Session(graph=self.graph_detection, config=self.config)
-        self.classification_session_tf = tf.Session(graph=self.graph_classification, config=self.config)
-        self.image_tensor = self.graph_detection.get_tensor_by_name('image_tensor:0')
-        self.in_graph = self.graph_classification.get_tensor_by_name('input_1_1:0')
-        self.out_graph = self.graph_classification.get_tensor_by_name('output_0:0')
+	self.detection_session_tf = tf.Session(graph=self.graph_detection, config=self.config)
+	self.image_tensor = self.graph_detection.get_tensor_by_name('image_tensor:0')
         self.detection_boxes = self.graph_detection.get_tensor_by_name('detection_boxes:0')
         self.detection_classes = self.graph_detection.get_tensor_by_name('detection_classes:0')
 	self.detection_scores = self.graph_detection.get_tensor_by_name('detection_scores:0')
 
-        ## preload mdoel weights
+        self.graph_classification = self.graph_load(classification_model_path, self.config)
+        self.classification_session_tf = tf.Session(graph=self.graph_classification, config=self.config)
+        self.in_graph = self.graph_classification.get_tensor_by_name('input_1_1:0')
+        self.out_graph = self.graph_classification.get_tensor_by_name('output_0:0')
+
+
+        ## preload model weights
         self.detection(cv2.cvtColor(np.zeros((600, 800), np.uint8), cv2.COLOR_GRAY2RGB))
         self.classification(cv2.cvtColor(np.zeros((32, 32), np.uint8), cv2.COLOR_GRAY2RGB))
 
