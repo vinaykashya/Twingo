@@ -1,4 +1,4 @@
-#Team Twingo - CarND Capstone
+# Team Twingo - CarND Capstone
 This project was the culmination of 9 months of accelerated learning in the self-driving space. The goal of the project was to implement and integrate everything we have learned over the the last 3 terms to be tested on in a real-world scenario. The skeleton software stack for the self-driving car was provided in ROS with autoware and dbw integrations. We had to implement a planning module (*waypoint updater*), a control module (*twist_control*) and a perception module (*traffic light detection*).
 
 ## Implementation details
