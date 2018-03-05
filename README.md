@@ -12,12 +12,14 @@ The waypoints loaded into the controller module, and the waypoint loader issues 
 This node publishes the waypoint of the closest treaffic light that is red when it is detected. The traffic light detection a optimised detector-classifer network. For the detector network we use the pre-trained SSD-Mobilenet architecture which is pretrained on the COCO dataset ( as one of the class labels in the dataset is traffic lights) followed by a low copmute and storage version of alexnet called squeezenet. The single shot detector architecture with mobilenet was chosen because of the accuracy and performance benefits as they are designed to run on low power hardware on the clients. Squeezenet was selected as it dramatically reduces the size for parameter storage and hence all the weights can fit on the RAM simultaneously. It was trained on some TL images from COCO and a few captured from the simulator.
 
 ## Team members
--Vinay Kashyap (Team lead) - vpkashya@asu.edu
--Tom Zheng - sotomso@hotmail.com
--Anh Le - atle2@uci.edu
--Daedeepya Yendluri - dyendlur@gmail.com
+*Vinay Kashyap (Team lead) - vpkashya@asu.edu
+*Tom Zheng - sotomso@hotmail.com
+*Anh Le - atle2@uci.edu
+*Daedeepya Yendluri - dyendlur@gmail.com
+*Marcos Ahuizotl Fragoso Iñiguez - mafragosoi@gmail.com
 
- 
+
+#Original Repo Instructions 
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
 
 Please use **one** of the two installation options, either native **or** docker installation.
