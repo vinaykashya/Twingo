@@ -11,7 +11,7 @@ The waypoints loaded into the controller module, and the waypoint loader issues 
 ### Perception Module (Traffic light detection and classification)
 This node publishes the waypoint of the closest treaffic light that is red when it is detected. The traffic light detection a optimised detector-classifer network. For the detector network we use the pre-trained SSD-Mobilenet architecture which is pretrained on the COCO dataset ( as one of the class labels in the dataset is traffic lights) followed by a low copmute and storage version of alexnet called squeezenet. The single shot detector architecture with mobilenet was chosen because of the accuracy and performance benefits as they are designed to run on low power hardware on the clients. Squeezenet was selected as it dramatically reduces the size for parameter storage and hence all the weights can fit on the RAM simultaneously. It was trained on some TL images from COCO and a few captured from the simulator.
 
-##Team members
+## Team members
 Vinay Kashyap (Team lead) - vpkashya@asu.edu
 Tom Zheng - sotomso@hotmail.com
 Anh Le - atle2@uci.edu
