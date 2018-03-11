@@ -15,7 +15,7 @@ import sys
 import numpy as np
 import time
 
-STATE_COUNT_THRESHOLD = 3
+STATE_COUNT_THRESHOLD = 2
 
 class TLDetector(object):
     def __init__(self):
@@ -62,12 +62,17 @@ class TLDetector(object):
         self.camera_image = msg
 
         light_wp, state = self.process_traffic_lights()
+	#rospy.logwarn(light_wp)
+	#rospy.logwarn(state)
         if self.state != state:
             self.state_count = 0
             self.state = state
         elif self.state_count >= STATE_COUNT_THRESHOLD :
             self.last_state = self.state
-            light_wp = light_wp if state == TrafficLight.RED else -1
+            if state == TrafficLight.RED or state == TrafficLight.YELLOW:
+		light_wp = light_wp
+	    else:
+		light_wp = -1
             self.last_wp = light_wp
             self.Traffic_light_pub.publish(Int32(light_wp))
         else:
